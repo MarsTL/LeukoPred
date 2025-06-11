@@ -12,7 +12,7 @@ from naive_bayes_classifier import run_classifier
 features_df = pd.read_csv("leukemia_features_discretized.csv")
 targets_df = pd.read_csv("leukemia_targets_discrete.csv")
 
-# drug to analyze
+# Drug to analyze
 drug = "Navitoclax"
 
 # Filter non-null drug targets
