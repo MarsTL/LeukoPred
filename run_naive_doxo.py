@@ -41,3 +41,4 @@ r2 = r2_score(y_test.astype(int), predictions.astype(int))
 print(f"\nRMSE: {rmse:.4f}")
 print(f"Test R²: {r2:.4f}")
 print(f"Drug/s tested: {drug}")
+
