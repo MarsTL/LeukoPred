@@ -58,7 +58,8 @@ def naive_bayes_classifier(test_data, prior_probabilities, counts):
             posterior = prior_probabilities[j]
             
             for k in features:
-                feature_val = test_data[k]
+                #feature_val = test_data[k]
+                feature_val = obs[k]
                 
                 # Get the count of the feature value and target value from the counts table
                 count_feature_val_and_target_val = counts.get(k, {}).get(feature_val, {}).get(j, 0)
@@ -110,8 +111,11 @@ def run_classifier(training_data, training_target, test_data, test_target):
                                    prior_probabilities = priors,
                                    counts = counts)
     
+    preds.index = test_target.index
+    
     pred_results(y_true = test_target,
                  y_pred = preds)
+    return preds
 
 
 
