@@ -119,9 +119,6 @@ def train_model(training_data, target_col_values, max_depth=5, min_leaf_size=5, 
 def calculate(y_true, y_pred):
     rmse = np.sqrt(mean_squared_error(y_true, y_pred))
     r2 = r2_score(y_true, y_pred)
-    # I'm editing this because accuracy (as far as I know) is a classification metric and =/= accuracy
-    # I couldn't find a name for this metric in the lecture slides, the textbook, or online
-    # However, it looks like maybe some people use it as a measure of "Goodness of fit"
     print(f"Goodness of fit: {(1 - rmse):.2%}")
     print("\nThe results of prediction are:")
     print(y_pred)
@@ -137,4 +134,54 @@ def calculate(y_true, y_pred):
     plt.grid(True)
     plt.show()
 
+def print_tree(node, feature_names=None, depth=0):
+    indent = "  " * depth
+    if node.value is not None:
+        print(f"{indent}Predict: {node.value:.4f}")
+    else:
+        feature_name = feature_names[node.feature] if feature_names else f"X[{node.feature}]"
+        print(f"{indent}if {feature_name} <= {node.threshold:.4f}:")
+        print_tree(node.left, feature_names, depth + 1)
+        print(f"{indent}else:  # {feature_name} > {node.threshold:.4f}")
+        print_tree(node.right, feature_names, depth + 1)
 
+
+def compute_tree_width(node):
+    if node is None or node.value is not None:
+        return 1
+    return compute_tree_width(node.left) + compute_tree_width(node.right)
+
+
+def plot_custom_tree(node, feature_names, ax=None, x=0.0, y=0.0, total_width=None, x_offset=0.0, level_height=1.0, depth=0):
+    if ax is None:
+        total_width = compute_tree_width(node)
+        fig, ax = plt.subplots(figsize=(max(10, total_width * 1.5), 6 + depth * 1))
+        ax.set_axis_off()
+        plot_custom_tree(node, feature_names, ax=ax, x=0.0, y=0.0, total_width=total_width)
+        plt.show()
+        return
+
+    if node.value is not None:
+        label = f"{node.value:.3f}"
+    else:
+        fname = feature_names[node.feature] if feature_names else f"X[{node.feature}]"
+        label = f"{fname} < {node.threshold:.2f}"
+
+    center_x = x_offset + (total_width / 2)
+    ax.text(center_x, -y, label, ha='center', va='center',
+            bbox=dict(facecolor='white', edgecolor='black'))
+
+    if node.left:
+        left_width = compute_tree_width(node.left)
+        child_center_x = x_offset + (left_width / 2)
+        ax.plot([center_x, child_center_x], [-y - 0.02, -y - level_height + 0.02], color='green')
+        plot_custom_tree(node.left, feature_names, ax, x_offset=x_offset, y=y + level_height,
+                         total_width=left_width, depth=depth + 1)
+
+    if node.right:
+        left_width = compute_tree_width(node.left) if node.left else 0
+        right_width = compute_tree_width(node.right)
+        child_center_x = x_offset + left_width + (right_width / 2)
+        ax.plot([center_x, child_center_x], [-y - 0.02, -y - level_height + 0.02], color='green')
+        plot_custom_tree(node.right, feature_names, ax, x_offset=x_offset + left_width,
+                         y=y + level_height, total_width=right_width, depth=depth + 1)
