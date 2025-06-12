@@ -12,6 +12,7 @@ from regression_tree import build_tree, predict, train_model, calculate
 
 # Load dataset
 df = pd.read_csv("leukemia_rnaseq_and_drug_response.csv")
+feat_csv = pd.read_csv("lasso_selected_features_combo.csv")
 
 # Define gene and drug columns
 # changing from 944 to 943 so that we are not accidentally pulling the erlotinib drug column
@@ -23,13 +24,14 @@ combo_drug = "Doxorubicin:navitoclax"
 gene_expr = df[gene_cols]
 gene_expr_scaled = (gene_expr - gene_expr.mean()) / gene_expr.std()
 
+# now this is performed in a separate script
 # --- LASSO REGULARIZATION ---
-lasso_mask = df[single_drugs].notnull().all(axis=1)
-X_lasso_df = gene_expr_scaled[lasso_mask]
-y_lasso = df.loc[lasso_mask, single_drugs[0]]  # Use Doxorubicin AUC
+#lasso_mask = df[single_drugs].notnull().all(axis=1)
+#X_lasso_df = gene_expr_scaled[lasso_mask]
+#y_lasso = df.loc[lasso_mask, single_drugs[0]]  # Use Doxorubicin AUC
 
 # Save column names before imputation
-feature_names = X_lasso_df.columns
+#feature_names = X_lasso_df.columns
 
 # Impute missing values
 # there are no missing values if things are being filtered to only include relevant drugs/responses
@@ -37,14 +39,14 @@ feature_names = X_lasso_df.columns
 #X_lasso = imputer.fit_transform(X_lasso_df)
 
 # Apply Lasso
-lasso = Lasso(alpha=0.01, max_iter=10000)
-lasso.fit(X_lasso_df, y_lasso)
-selected_features = feature_names[(lasso.coef_ != 0)]
+#lasso = Lasso(alpha=0.01, max_iter=10000)
+#lasso.fit(X_lasso_df, y_lasso)
+selected_features = feat_csv["0"]
 
-print(f" Lasso selected {len(selected_features)} features from {len(gene_cols)}\n")
+#print(f" Lasso selected {len(selected_features)} features from {len(gene_cols)}\n")
 
 # Reduce dataset
-gene_expr_scaled = gene_expr_scaled[selected_features]
+#gene_expr_scaled = gene_expr_scaled[selected_features]
 
 # --- TRAIN DATA ---
 train_frames = []
@@ -57,6 +59,11 @@ for drug in single_drugs:
     train_frames.append(temp)
 
 train_df = pd.concat(train_frames).reset_index(drop=True)
+train_df = train_df.rename(columns = {"Drug_Doxorubicin" : "Doxorubicin_Treated",
+                                      "Drug_Navitoclax" : "Navitoclax_Treated"})
+target_name = pd.Series(["AUC"])
+training_features = pd.concat([selected_features, target_name])
+train_df = train_df[training_features]
 
 # Balance by AUC
 df_high = train_df[train_df["AUC"] <= 0.33]
@@ -77,6 +84,10 @@ test_df = gene_expr_scaled[combo_mask].copy()
 for d in single_drugs:
     test_df[f"Drug_{d}"] = 1
 y_test = df.loc[combo_mask, combo_drug].values
+
+test_df = test_df.rename(columns = {"Drug_Doxorubicin" : "Doxorubicin_Treated",
+                                      "Drug_Navitoclax" : "Navitoclax_Treated"})
+test_df = test_df[selected_features]
 
 # --- TRAIN TREE ---
 X_train = train_df_balanced.drop(columns=["AUC"]).values
