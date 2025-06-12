@@ -13,6 +13,8 @@ from regression_tree import train_model, build_tree, predict, calculate
 df = pd.read_csv("leukemia_rnaseq_and_drug_response.csv")
 # had to change to 943 from 944, as it was mistakenly grabbing erlotinib
 gene_cols = df.columns[1:943]
+dox_feat = pd.read_csv("lasso_selected_features_doxorubicin.csv")
+nav_feat = pd.read_csv("lasso_selected_features_navitoclax.csv")
 
 def run_pipeline(drug_name):
     print(f"\nRunning regression tree for: {drug_name} ************") 
@@ -21,20 +23,22 @@ def run_pipeline(drug_name):
     X_raw = df_valid[gene_cols]
     y = df_valid[drug_name]
 
-    imputer = SimpleImputer(strategy='mean')
-    X_imputed = imputer.fit_transform(X_raw)
+    #imputer = SimpleImputer(strategy='mean')
+    #X_imputed = imputer.fit_transform(X_raw)
+    selected_features = lasso_feat["0"]
+    X_raw = X_raw[selected_features]
     scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(X_imputed)
+    X_scaled = scaler.fit_transform(X_raw)
 
 # had to lower the alpha, as lasso was pushing all features to 0 in dox
-    lasso = Lasso(alpha=0.01, max_iter=10000)
-    lasso.fit(X_raw, y)
-    selected_idx = np.where(lasso.coef_ != 0)[0]
-    selected_features = X_raw.columns[selected_idx]
-    X_selected = X_scaled[:, selected_idx]
+    #lasso = Lasso(alpha=0.01, max_iter=10000)
+    #lasso.fit(X_raw, y)
+    #selected_idx = np.where(lasso.coef_ != 0)[0]
+    #selected_features = X_raw.columns[selected_idx]
+    #X_selected = X_scaled[:, selected_idx]
 
-    split = int(0.8 * len(X_selected))
-    X_train, X_test = X_selected[:split], X_selected[split:]
+    split = int(0.8 * len(X_scaled))
+    X_train, X_test = X_scaled[:split], X_scaled[split:]
     y_train, y_test = y.values[:split], y.values[split:]
 
 # had to change min_samples_leaf to min_leaf_size, otherwise script fails
@@ -61,8 +65,8 @@ def run_pipeline(drug_name):
         "Test_R2": r2
     }
 
-navitoclax_summary = run_pipeline("Navitoclax")
-doxorubicin_summary = run_pipeline("Doxorubicin")
+navitoclax_summary = run_pipeline("Navitoclax", nav_feat)
+doxorubicin_summary = run_pipeline("Doxorubicin", dox_feat)
 
 summary_df = pd.DataFrame([
     ["Drug", navitoclax_summary["Drug"], doxorubicin_summary["Drug"]],
