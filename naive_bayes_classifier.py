@@ -6,10 +6,10 @@ Contains functions for the naive bayes classifier.
 
 import numpy as np
 import pandas as pd
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, classification_report
 
 def prior_probability(data, target_col):
-    # for each of the classes in the target column, calculate the prior
+    # For each of the classes in the target column, calculate the prior
     # probabilities
     prior_probabilities = data[target_col].value_counts().to_dict()
     return prior_probabilities
@@ -87,17 +87,26 @@ def naive_bayes_classifier(test_data, prior_probabilities, counts):
 
 
 def pred_results(y_true, y_pred):
-    # calculates error for the naive bayes classifier
-    total_samp = len(y_true)
-    
-    num_correct = np.sum(y_true == y_pred)
-    
-    success_rate = num_correct/total_samp
+    # Calculates accuracy for the naive bayes classifier
+    # This is no longer needed since accuaracy is included with the classification report
+    #total_samp = len(y_true)
+    #num_correct = np.sum(y_true == y_pred)
+
+    # no longer needs this since it is calculated in classification report
+    # just rounds the result
+    #success_rate = num_correct/total_samp
+
+    report = classification_report(y_true, y_pred, zero_division=np.nan)
     
     conf_mat = confusion_matrix(y_true, y_pred)
-    
-    print(f"The prediction accuracy is: {success_rate:.2%}")
-    print("\nThe results of prediction are:\n", conf_mat)
+
+    print("The results of prediction are:\n",)
+    disp = ConfusionMatrixDisplay(confusion_matrix=conf_mat)
+    disp.plot()
+
+    # No longer need this since accuracy is included in the classification report function
+    #print(f"The prediction accuracy is: {success_rate:.2%}")
+    print(report)
 
 
 def run_classifier(training_data, training_target, test_data, test_target):
