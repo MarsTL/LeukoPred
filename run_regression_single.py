@@ -22,7 +22,8 @@ for drug in drug:
 
     # Extract features and target
     # Columns 1 to 943 = gene features
-    X = valid_targets.iloc[:, 1:944].values  
+    # changed from 944 to 943 as the previos iteration was incorrectly grabbing the erlotinib column
+    X = valid_targets.iloc[:, 1:943].values  
     y = valid_targets[drug].values
 
     # Train-test split
