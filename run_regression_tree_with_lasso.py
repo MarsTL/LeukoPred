@@ -9,6 +9,8 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import Lasso
 from sklearn.metrics import root_mean_squared_error, r2_score
 from regression_tree import train_model, build_tree, predict, calculate
+from regression_tree import print_tree, plot_custom_tree
+
 
 df = pd.read_csv("leukemia_rnaseq_and_drug_response.csv")
 # had to change to 943 from 944, as it was mistakenly grabbing erlotinib
@@ -16,7 +18,7 @@ gene_cols = df.columns[1:943]
 dox_feat = pd.read_csv("lasso_selected_features_doxorubicin.csv")
 nav_feat = pd.read_csv("lasso_selected_features_navitoclax.csv")
 
-def run_pipeline(drug_name):
+def run_pipeline(drug_name, lasso_feat):
     print(f"\nRunning regression tree for: {drug_name} ************") 
     
     df_valid = df[df[drug_name].notnull()]
@@ -51,6 +53,13 @@ def run_pipeline(drug_name):
     r2 = r2_score(y_test, y_pred)
     
     calculate(y_test, y_pred)
+    
+    print("\nTree Structure ********")
+    print_tree(model, selected_features.tolist())
+
+    print(f"\Showing {drug_name} tree **********")
+    plot_custom_tree(model, selected_features.tolist())
+
 
     return {
         "Drug": drug_name,
@@ -68,6 +77,7 @@ def run_pipeline(drug_name):
 navitoclax_summary = run_pipeline("Navitoclax", nav_feat)
 doxorubicin_summary = run_pipeline("Doxorubicin", dox_feat)
 
+
 summary_df = pd.DataFrame([
     ["Drug", navitoclax_summary["Drug"], doxorubicin_summary["Drug"]],
     ["Training Samples", navitoclax_summary["Training_Samples"], doxorubicin_summary["Training_Samples"]],
@@ -82,5 +92,4 @@ summary_df = pd.DataFrame([
 ], columns=["Metric", "Navitoclax", "Doxorubicin"])
 
 print(summary_df.to_string(index=False))
-
 

@@ -9,6 +9,7 @@ from sklearn.impute import SimpleImputer
 from sklearn.utils import resample
 from sklearn.metrics import mean_squared_error, r2_score, root_mean_squared_error
 from regression_tree import build_tree, predict, train_model, calculate
+from regression_tree import print_tree, plot_custom_tree
 
 # Load dataset
 df = pd.read_csv("leukemia_rnaseq_and_drug_response.csv")
@@ -101,6 +102,14 @@ tree_model = train_model(X_train, y_train, max_depth=5, min_leaf_size=5, min_std
 
 y_pred = predict(tree_model, X_test)
 calculate(y_test, y_pred)
+
+# Tree structure 
+print("\nCombo Drug Tree Structure **************")
+print_tree(tree_model, selected_features.tolist())
+
+print("\nDisplaying Combo Drug Tree of {combo_drug}  *************")
+plot_custom_tree(tree_model, selected_features.tolist())
+
 
 # --- EVALUATE ---
 rmse = root_mean_squared_error(y_test, y_pred)
