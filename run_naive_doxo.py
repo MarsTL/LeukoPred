@@ -4,7 +4,8 @@
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_squared_error, r2_score
+#from sklearn.metrics import mean_squared_error, r2_score
+# removing this as these metrics don't seem typical for evaluating categorical data
 
 from naive_bayes_classifier import run_classifier
 
@@ -35,10 +36,12 @@ predictions = run_classifier(train_data, 'target', X_test, y_test)
 predictions.index = y_test.index  # Align index for evaluation
 
 # rmse and r2
-rmse = np.sqrt(mean_squared_error(y_test.astype(int), predictions.astype(int)))
-r2 = r2_score(y_test.astype(int), predictions.astype(int))
+#rmse = np.sqrt(mean_squared_error(y_test.astype(int), predictions.astype(int)))
+#r2 = r2_score(y_test.astype(int), predictions.astype(int))
+# again, removing as these don't seem normal to use with categorical data
+# please correct me if I'm wrong though
 
-print(f"\nRMSE: {rmse:.4f}")
-print(f"Test R²: {r2:.4f}")
+#print(f"\nRMSE: {rmse:.4f}")
+#print(f"Test R²: {r2:.4f}")
 print(f"Drug/s tested: {drug}")
 

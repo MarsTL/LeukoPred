@@ -7,6 +7,7 @@ Contains functions for the regression tree.
 import numpy as np
 import pandas as pd
 from sklearn.metrics import mean_squared_error, r2_score
+import matplotlib.pyplot as plt
 
 # Decision tree
 class TreeNode:
@@ -118,11 +119,22 @@ def train_model(training_data, target_col_values, max_depth=5, min_leaf_size=5, 
 def calculate(y_true, y_pred):
     rmse = np.sqrt(mean_squared_error(y_true, y_pred))
     r2 = r2_score(y_true, y_pred)
-    print(f"The prediction accuracy: {(1 - rmse):.2%}")
+    # I'm editing this because accuracy (as far as I know) is a classification metric and =/= accuracy
+    # I couldn't find a name for this metric in the lecture slides, the textbook, or online
+    # However, it looks like maybe some people use it as a measure of "Goodness of fit"
+    print(f"Goodness of fit: {(1 - rmse):.2%}")
     print("\nThe results of prediction are:")
     print(y_pred)
     print(f"\nRMSE: {rmse:.4f}")
     print(f"Test R²: {r2:.4f}")
 
+    # Adding code to plot the results of prediction to compare to true values
+    plt.figure(figsize=(5, 5))
+    plt.scatter(y_true, y_pred)
+    plt.xlabel("Actual AUC (Normalized)")
+    plt.ylabel("Predicted AUC (Normalized)")
+    plt.title("Actual vs. Predicted AUC")
+    plt.grid(True)
+    plt.show()
 
 
