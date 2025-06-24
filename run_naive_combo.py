@@ -4,9 +4,6 @@
 
 import pandas as pd
 import numpy as np
-#from sklearn.metrics import mean_squared_error, r2_score
-# removing this as these metrics don't seem typical for evaluating categorical data
-
 from naive_bayes_classifier import run_classifier
 
 # Load data

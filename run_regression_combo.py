@@ -3,7 +3,6 @@
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
-#from sklearn.metrics import mean_squared_error, r2_score
 from regression_tree import train_model, predict, calculate
 
 
@@ -25,7 +24,6 @@ print(f"\nRunning regression tree for: {combo_drug} ************")
 valid_targets = features_df.dropna(subset=[combo_drug])
 
 # Extract features and target
-# Columns 1 to 943 = gene features
 test_features = valid_targets.iloc[:, 0:943]
 # grab binarized drug presence columns
 test_features = pd.merge(test_features, disc_feat_df[["Sample", "Navitoclax_Present_Combo",

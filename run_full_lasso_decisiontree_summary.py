@@ -25,29 +25,7 @@ combo_drug = "Doxorubicin:navitoclax"
 gene_expr = df[gene_cols]
 gene_expr_scaled = (gene_expr - gene_expr.mean()) / gene_expr.std()
 
-# now this is performed in a separate script
-# --- LASSO REGULARIZATION ---
-#lasso_mask = df[single_drugs].notnull().all(axis=1)
-#X_lasso_df = gene_expr_scaled[lasso_mask]
-#y_lasso = df.loc[lasso_mask, single_drugs[0]]  # Use Doxorubicin AUC
-
-# Save column names before imputation
-#feature_names = X_lasso_df.columns
-
-# Impute missing values
-# there are no missing values if things are being filtered to only include relevant drugs/responses
-#imputer = SimpleImputer(strategy='mean')
-#X_lasso = imputer.fit_transform(X_lasso_df)
-
-# Apply Lasso
-#lasso = Lasso(alpha=0.01, max_iter=10000)
-#lasso.fit(X_lasso_df, y_lasso)
 selected_features = feat_csv["0"]
-
-#print(f" Lasso selected {len(selected_features)} features from {len(gene_cols)}\n")
-
-# Reduce dataset
-#gene_expr_scaled = gene_expr_scaled[selected_features]
 
 # --- TRAIN DATA ---
 train_frames = []
@@ -95,9 +73,6 @@ X_train = train_df_balanced.drop(columns=["AUC"]).values
 y_train = train_df_balanced["AUC"].values
 X_test = test_df.values
 
-# had to change min_samples_leaf to min_leaf_size, otherwise script fails
-#tree_model = build_tree(X_train, y_train, max_depth=5, min_leaf_size=5, min_std=0.15)
-   # don't actually need to call build_tree by itself, as train model already calls build_tree
 tree_model = train_model(X_train, y_train, max_depth=5, min_leaf_size=5, min_std=0.01, alpha=0.01)
 
 y_pred = predict(tree_model, X_test)

@@ -4,7 +4,6 @@
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
-#from sklearn.metrics import mean_squared_error, r2_score
 from regression_tree import train_model, predict, calculate
 
 
@@ -21,8 +20,6 @@ for drug in drug:
     valid_targets = features_df.dropna(subset=[drug])
 
     # Extract features and target
-    # Columns 1 to 943 = gene features
-    # changed from 944 to 943 as the previos iteration was incorrectly grabbing the erlotinib column
     X = valid_targets.iloc[:, 1:943].values  
     y = valid_targets[drug].values
 

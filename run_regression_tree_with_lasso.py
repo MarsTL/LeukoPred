@@ -13,7 +13,6 @@ from regression_tree import print_tree, plot_custom_tree
 
 
 df = pd.read_csv("leukemia_rnaseq_and_drug_response.csv")
-# had to change to 943 from 944, as it was mistakenly grabbing erlotinib
 gene_cols = df.columns[1:943]
 dox_feat = pd.read_csv("lasso_selected_features_doxorubicin.csv")
 nav_feat = pd.read_csv("lasso_selected_features_navitoclax.csv")
@@ -32,20 +31,11 @@ def run_pipeline(drug_name, lasso_feat):
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X_raw)
 
-# had to lower the alpha, as lasso was pushing all features to 0 in dox
-    #lasso = Lasso(alpha=0.01, max_iter=10000)
-    #lasso.fit(X_raw, y)
-    #selected_idx = np.where(lasso.coef_ != 0)[0]
-    #selected_features = X_raw.columns[selected_idx]
-    #X_selected = X_scaled[:, selected_idx]
-
     split = int(0.8 * len(X_scaled))
     X_train, X_test = X_scaled[:split], X_scaled[split:]
     y_train, y_test = y.values[:split], y.values[split:]
 
 # had to change min_samples_leaf to min_leaf_size, otherwise script fails
-   # model = build_tree(X_train, y_train, max_depth=5, min_leaf_size=5, min_std=0.15)
-   # don't actually need to call build_tree by itself, as train model already calls build_tree
     model = train_model(X_train, y_train, max_depth=5, min_leaf_size=5, min_std=0.01, alpha=0.01)
     y_pred = predict(model, X_test)
 
@@ -57,7 +47,7 @@ def run_pipeline(drug_name, lasso_feat):
     print("\nTree Structure ********")
     print_tree(model, selected_features.tolist())
 
-    print(f"\Showing {drug_name} tree **********")
+    print(f"\nShowing {drug_name} tree **********")
     plot_custom_tree(model, selected_features.tolist())
 
 

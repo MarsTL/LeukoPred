@@ -9,7 +9,6 @@ from sklearn.preprocessing import StandardScaler
 df = pd.read_csv("leukemia_rnaseq_and_drug_response.csv")
 
 # Gene and target setup
-# needed to change index so that erlotinib was not being included
 gene_cols = df.columns[1:943]
 drug = "Doxorubicin"
 mask = df[drug].notnull()
